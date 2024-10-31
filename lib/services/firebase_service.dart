@@ -1,0 +1,1 @@
+//Gestion des interactions avec Firebase (auth, database)
