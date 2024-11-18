@@ -10,30 +10,66 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Connexion")),
+      appBar: AppBar(
+        title: Text("Connexion"),
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: "Adresse e-mail"),
+              decoration: InputDecoration(
+                labelText: "Adresse e-mail",
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
             ),
+            SizedBox(height: 10),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: "Mot de passe"),
+              decoration: InputDecoration(
+                labelText: "Mot de passe",
+                border: OutlineInputBorder(),
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Logique de connexion, puis redirection
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => DeviceSelectionPage()),
-                );
+                if (emailController.text.isEmpty ||
+                    passwordController.text.isEmpty) {
+                  // Si un champ est vide, affichez un message d'erreur
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Erreur"),
+                      content: Text(
+                          "Veuillez remplir tous les champs pour continuer."),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  // Logique de connexion réussie
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DeviceSelectionPage(
+                        username: emailController.text,
+                      ),
+                    ),
+                  );
+                }
               },
               child: Text("Se connecter"),
             ),
@@ -54,14 +90,19 @@ class LoginPage extends StatelessWidget {
               ],
             ),
             SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
-                );
-              },
-              child: Text("Mot de passe oublié ?"),
+            Align(
+              alignment: Alignment.center,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ForgotPasswordPage(),
+                    ),
+                  );
+                },
+                child: Text("Mot de passe oublié ?"),
+              ),
             ),
           ],
         ),
