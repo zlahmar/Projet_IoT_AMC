@@ -1,6 +1,6 @@
 // welcome_page.dart
 import 'package:flutter/material.dart';
-import '../auth/login_page.dart'; // Importe la page de connexion
+import '../auth/login_page.dart';
 
 class WelcomePage extends StatefulWidget {
   @override
