@@ -1,10 +1,11 @@
-// login_page.dart
 import 'package:flutter/material.dart';
-import '../home/message_page.dart';
+import 'register_page.dart'; // Page d'inscription
+import 'forgot_password_page.dart'; // Page pour mot de passe oublié
+import '../home/device_selection_page.dart'; // Page de sélection de l'appareil
 
 class LoginPage extends StatelessWidget {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController deviceIdController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -16,32 +17,51 @@ class LoginPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: usernameController,
-              decoration: InputDecoration(labelText: "Nom d'utilisateur"),
+              controller: emailController,
+              decoration: InputDecoration(labelText: "Adresse e-mail"),
             ),
             TextField(
-              controller: deviceIdController,
-              decoration: InputDecoration(labelText: "ID de l'appareil"),
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(labelText: "Mot de passe"),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Action de connexion (validation du formulaire ou interaction Firebase)
+                // Logique de connexion, puis redirection
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          MessagePage(username: usernameController.text)),
+                      builder: (context) => DeviceSelectionPage()),
                 );
               },
               child: Text("Se connecter"),
             ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Pas de compte ?"),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                    );
+                  },
+                  child: Text("S'inscrire"),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
             TextButton(
               onPressed: () {
-                // Code de scan du QR code pour remplir l'ID de l'appareil
-                // (Utilisation d'un package de scan QR)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                );
               },
-              child: Text("Scanner le QR Code"),
+              child: Text("Mot de passe oublié ?"),
             ),
           ],
         ),
