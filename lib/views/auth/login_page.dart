@@ -1,47 +1,108 @@
-// login_page.dart
 import 'package:flutter/material.dart';
-import '../home/message_page.dart';
+import 'register_page.dart'; // Page d'inscription
+import 'forgot_password_page.dart'; // Page pour mot de passe oublié
+import '../home/device_selection_page.dart'; // Page de sélection de l'appareil
 
 class LoginPage extends StatelessWidget {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController deviceIdController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Connexion")),
+      appBar: AppBar(
+        title: Text("Connexion"),
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
-              controller: usernameController,
-              decoration: InputDecoration(labelText: "Nom d'utilisateur"),
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: "Adresse e-mail",
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
             ),
+            SizedBox(height: 10),
             TextField(
-              controller: deviceIdController,
-              decoration: InputDecoration(labelText: "ID de l'appareil"),
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: "Mot de passe",
+                border: OutlineInputBorder(),
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Action de connexion (validation du formulaire ou interaction Firebase)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          MessagePage(username: usernameController.text)),
-                );
+                if (emailController.text.isEmpty ||
+                    passwordController.text.isEmpty) {
+                  // Si un champ est vide, affichez un message d'erreur
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Erreur"),
+                      content: Text(
+                          "Veuillez remplir tous les champs pour continuer."),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  // Logique de connexion réussie
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DeviceSelectionPage(
+                        username: emailController.text,
+                      ),
+                    ),
+                  );
+                }
               },
               child: Text("Se connecter"),
             ),
-            TextButton(
-              onPressed: () {
-                // Code de scan du QR code pour remplir l'ID de l'appareil
-                // (Utilisation d'un package de scan QR)
-              },
-              child: Text("Scanner le QR Code"),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Pas de compte ?"),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                    );
+                  },
+                  child: Text("S'inscrire"),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.center,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ForgotPasswordPage(),
+                    ),
+                  );
+                },
+                child: Text("Mot de passe oublié ?"),
+              ),
             ),
           ],
         ),
