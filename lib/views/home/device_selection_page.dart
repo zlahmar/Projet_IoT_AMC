@@ -1,12 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Pour Firestore
 import '../home/message_page.dart';
 
-class DeviceSelectionPage extends StatelessWidget {
-  final String username; // Ajout du paramètre username pour l'utilisateur
-  final List<String> previousDevices = ["Device 1", "Device 2", "Device 3"];
+class DeviceSelectionPage extends StatefulWidget {
+  final String username; // Username de l'utilisateur
+  final String userId; // UID de l'utilisateur Firebase
 
-  DeviceSelectionPage(
-      {required this.username}); // Constructeur pour récupérer l'username
+  DeviceSelectionPage({required this.username, required this.userId});
+
+  @override
+  _DeviceSelectionPageState createState() => _DeviceSelectionPageState();
+}
+
+class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<String> userDevices = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userId.isEmpty) {
+      print("Erreur: userId est vide !");
+      return;
+    }
+    _loadUserDevices(); // Charger les appareils associés à l'utilisateur
+  }
+
+  Future<void> _loadUserDevices() async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(widget.userId).get();
+      if (userDoc.exists) {
+        setState(() {
+          userDevices = List<String>.from(userDoc.get('deviceIds') ?? []);
+        });
+      }
+    } catch (e) {
+      print("Erreur lors du chargement des appareils : $e");
+    }
+  }
+
+  Future<void> _addDevice(String deviceId) async {
+    try {
+      // Ajouter l'appareil dans la collection 'devices'
+      await _firestore.collection('devices').doc(deviceId).set({
+        'deviceId': deviceId,
+        'assignedTo': widget.userId,
+        'status': 'active',
+      });
+
+      // Associer l'appareil à l'utilisateur dans la collection 'users'
+      userDevices.add(deviceId);
+      await _firestore.collection('users').doc(widget.userId).update({
+        'deviceIds': userDevices,
+      });
+
+      // Mettre à jour l'interface utilisateur
+      setState(() {});
+    } catch (e) {
+      print("Erreur lors de l'ajout de l'appareil : $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,42 +79,43 @@ class DeviceSelectionPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: previousDevices.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 4,
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      leading: Icon(Icons.devices, color: Colors.blue),
-                      title: Text(
-                        previousDevices[index],
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        // Redirection vers MessagePage
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MessagePage(
-                              username: username, // Passage de l'username
+              child: userDevices.isEmpty
+                  ? Center(child: Text("Aucun appareil trouvé."))
+                  : ListView.builder(
+                      itemCount: userDevices.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: Icon(Icons.devices, color: Colors.blue),
+                            title: Text(
+                              userDevices[index],
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
                             ),
+                            trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                            onTap: () {
+                              // Redirection vers MessagePage
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MessagePage(
+                                    username: widget.username, role: '', deviceId: '',
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
                     ),
-                  );
-                },
-              ),
             ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  _showAddDeviceDialog(
-                      context); // Affiche la boîte de dialogue pour ajouter un appareil
+                  _showAddDeviceDialog(context);
                 },
                 icon: Icon(Icons.add),
                 label: Text("Ajouter un nouvel appareil"),
@@ -105,19 +159,11 @@ class DeviceSelectionPage extends StatelessWidget {
               child: Text("Annuler"),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 String deviceId = deviceIdController.text.trim();
                 if (deviceId.isNotEmpty) {
-                  // Ajouter la logique pour enregistrer le nouvel appareil ici
-                  print("Nouveau device ajouté : $deviceId");
-
-                  // Redirection vers la page des messages
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MessagePage(username: username),
-                    ),
-                  );
+                  Navigator.pop(context); // Fermer la boîte de dialogue
+                  await _addDevice(deviceId); // Ajouter l'appareil
                 } else {
                   // Afficher une erreur si l'ID est vide
                   ScaffoldMessenger.of(context).showSnackBar(

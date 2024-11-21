@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'register_page.dart'; // Page d'inscription
 import 'forgot_password_page.dart'; // Page pour mot de passe oublié
 import '../home/device_selection_page.dart'; // Page de sélection de l'appareil
@@ -39,7 +40,7 @@ class LoginPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (emailController.text.isEmpty ||
                     passwordController.text.isEmpty) {
                   // Si un champ est vide, affichez un message d'erreur
@@ -60,15 +61,42 @@ class LoginPage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Logique de connexion réussie
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DeviceSelectionPage(
-                        username: emailController.text,
+                  try {
+                    // Authentification Firebase
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .signInWithEmailAndPassword(
+                            email: emailController.text,
+                            password: passwordController.text);
+
+                    // Connexion réussie
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DeviceSelectionPage(
+                          username: userCredential.user?.email ?? '',
+                          userId: userCredential.user?.uid ?? '',
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } catch (e) {
+                    // En cas d'erreur
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Erreur"),
+                        content:
+                            Text("Échec de la connexion : ${e.toString()}"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                 }
               },
               child: Text("Se connecter"),
