@@ -14,6 +14,23 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
+    <!-- Place ces balises dans le <head> -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBHnLyfkczm885sYWhktmzvTF7LdbPHIy0",
+    authDomain: "projetiot-a0f6d.firebaseapp.com",
+    projectId: "projetiot-a0f6d",
+    storageBucket: "projetiot-a0f6d.appspot.com",
+    messagingSenderId: "657380913755",
+    appId: "1:657380913755:web:b3fc7e947bfe8f59ff857e"
+  };
+  // Initialiser Firebase pour le Web
+  firebase.initializeApp(firebaseConfig);
+</script>
+
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
