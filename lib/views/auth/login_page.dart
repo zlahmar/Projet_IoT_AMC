@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'register_page.dart'; // Page d'inscription
-import 'forgot_password_page.dart'; // Page pour mot de passe oublié
-import '../home/device_selection_page.dart'; // Page de sélection de l'appareil
+import 'register_page.dart';
+import 'forgot_password_page.dart';
+import '../home/device_selection_page.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -21,6 +21,14 @@ class LoginPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            //affichage du logo
+            Center(
+              child: Image.asset(
+                'images/logo.png',
+                height: 100,
+              ),
+            ),
+            SizedBox(height: 30),
             TextField(
               controller: emailController,
               decoration: InputDecoration(
@@ -117,7 +125,7 @@ class LoginPage extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            //SizedBox(height: 10),
             Align(
               alignment: Alignment.center,
               child: TextButton(

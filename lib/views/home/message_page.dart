@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../auth/profile_page.dart';
-import '../admin/history_page.dart'; // Page pour afficher l'historique (à créer)
 
 class MessagePage extends StatelessWidget {
   final String username; // Nom de l'utilisateur
-  final String role; // Rôle de l'utilisateur (admin, superadmin, user)
+  final String userId; // ID de l'utilisateur
   final String deviceId; // Identifiant de l'appareil
+  final String role; // Rôle de l'utilisateur (admin, superadmin, etc.)
   final TextEditingController messageController = TextEditingController();
 
   MessagePage({
     required this.username,
-    required this.role,
+    required this.userId,
     required this.deviceId,
-  });
+    required this.role, // Ajout de role dans le constructeur
+  }) {
+    if (deviceId.isEmpty) {
+      print("Erreur : deviceId est vide.");
+    }
+  }
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -21,7 +26,6 @@ class MessagePage extends StatelessWidget {
     if (message.isEmpty) return;
 
     try {
-      // Ajouter le message à l'historique
       await _firestore.collection('history').add({
         'deviceId': deviceId,
         'timestamp': Timestamp.now(),
@@ -29,7 +33,6 @@ class MessagePage extends StatelessWidget {
         'message': message,
       });
 
-      // Logique pour envoyer le message au périphérique (par ex., via MQTT ou une autre méthode)
       print("Message envoyé : $message");
     } catch (e) {
       print("Erreur lors de l'envoi du message : $e");
@@ -49,23 +52,15 @@ class MessagePage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ProfilePage(username: username)),
+                  builder: (context) => ProfilePage(
+                    username: username,
+                    userId: userId,
+                    role: role,
+                  ),
+                ),
               );
             },
           ),
-          if (role == 'admin' ||
-              role == 'superadmin') // Admins/superadmins uniquement
-            IconButton(
-              icon: Icon(Icons.history),
-              onPressed: () {
-                // Ouvre la page d'historique
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HistoryPage(deviceId: deviceId)),
-                );
-              },
-            ),
         ],
       ),
       body: Padding(

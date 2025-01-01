@@ -21,12 +21,14 @@ class HistoryPage extends StatelessWidget {
             .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
+          // Affichage en attendant les données
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
 
           final historyDocs = snapshot.data!.docs;
 
+          // Aucune donnée trouvée
           if (historyDocs.isEmpty) {
             return Center(child: Text("Aucun historique pour cet appareil."));
           }
@@ -35,10 +37,21 @@ class HistoryPage extends StatelessWidget {
             itemCount: historyDocs.length,
             itemBuilder: (context, index) {
               var history = historyDocs[index].data() as Map<String, dynamic>;
+
+              // Débogage : Afficher ce que nous avons reçu
+              print("Data received: ${history['message']}");
+              print("Timestamp: ${history['timestamp']}");
+
+              // Si timestamp est un Timestamp Firestore, utiliser cette ligne :
+              DateTime timestamp = (history['timestamp'] is Timestamp)
+                  ? (history['timestamp'] as Timestamp).toDate()
+                  : DateTime
+                      .now(); // Si ce n'est pas un Timestamp, utiliser la date actuelle (juste pour éviter un crash)
+
               return ListTile(
                 title: Text(history['message']),
                 subtitle: Text(
-                    "Par: ${history['username']} - ${DateTime.fromMillisecondsSinceEpoch(history['timestamp'].millisecondsSinceEpoch)}"),
+                    "Par: ${history['username']} - ${timestamp.toString()}"),
               );
             },
           );

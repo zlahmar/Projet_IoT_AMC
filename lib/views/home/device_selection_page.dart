@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Pour Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../home/message_page.dart';
+import '/theme.dart';
 
 class DeviceSelectionPage extends StatefulWidget {
   final String username; // Username de l'utilisateur
@@ -28,7 +29,8 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
 
   Future<void> _loadUserDevices() async {
     try {
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(widget.userId).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(widget.userId).get();
       if (userDoc.exists) {
         setState(() {
           userDevices = List<String>.from(userDoc.get('deviceIds') ?? []);
@@ -40,7 +42,24 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
   }
 
   Future<void> _addDevice(String deviceId) async {
+    if (deviceId.isEmpty) {
+      print("Erreur : deviceId est vide.");
+      return;
+    }
+
     try {
+      // Vérifiez si l'appareil existe déjà
+      DocumentSnapshot existingDevice =
+          await _firestore.collection('devices').doc(deviceId).get();
+
+      if (existingDevice.exists) {
+        print("L'appareil existe déjà.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Cet appareil est déjà enregistré.")),
+        );
+        return;
+      }
+
       // Ajouter l'appareil dans la collection 'devices'
       await _firestore.collection('devices').doc(deviceId).set({
         'deviceId': deviceId,
@@ -56,6 +75,7 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
 
       // Mettre à jour l'interface utilisateur
       setState(() {});
+      print("Appareil ajouté : $deviceId");
     } catch (e) {
       print("Erreur lors de l'ajout de l'appareil : $e");
     }
@@ -65,7 +85,14 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sélection de l'appareil"),
+        title: Row(
+          children: [
+            Image.asset('images/logo.png', width: 40),
+            SizedBox(width: 10),
+            Text("Sélection de l'appareil",
+                style: Theme.of(context).textTheme.headline1),
+          ],
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -75,7 +102,7 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
           children: [
             Text(
               "Sélectionnez un appareil existant ou ajoutez-en un nouveau :",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.bodyText1,
             ),
             SizedBox(height: 20),
             Expanded(
@@ -88,20 +115,25 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
                           elevation: 4,
                           margin: EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
-                            leading: Icon(Icons.devices, color: Colors.blue),
+                            leading:
+                                Icon(Icons.devices, color: AppColors.darkBlue),
                             title: Text(
                               userDevices[index],
                               style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.darkBlue),
                             ),
                             trailing: Icon(Icons.arrow_forward_ios, size: 16),
                             onTap: () {
-                              // Redirection vers MessagePage
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => MessagePage(
-                                    username: widget.username, role: '', deviceId: '',
+                                    username: widget.username,
+                                    role: 'user',
+                                    userId: widget.userId,
+                                    deviceId: userDevices[index],
                                   ),
                                 ),
                               );
@@ -138,7 +170,8 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Ajouter un nouvel appareil"),
+          title: Text("Ajouter un nouvel appareil",
+              style: TextStyle(color: AppColors.darkBlue)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -156,7 +189,8 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
               onPressed: () {
                 Navigator.pop(context); // Fermer la boîte de dialogue
               },
-              child: Text("Annuler"),
+              child:
+                  Text("Annuler", style: TextStyle(color: AppColors.darkBlue)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -171,7 +205,7 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
                   );
                 }
               },
-              child: Text("Valider"),
+              child: Text("Valider", style: TextStyle(color: AppColors.white)),
             ),
           ],
         );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '/theme.dart';
 
 class RegisterPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -24,6 +25,7 @@ class RegisterPage extends StatelessWidget {
           'deviceIds': [], // Initialiser un tableau vide pour les appareils
           'createdAt':
               FieldValue.serverTimestamp(), // Ajouter la date de création
+          'role': 'user', // Attribuer le rôle 'user' par défaut
         });
 
         print("Utilisateur ajouté à Firestore avec l'ID : ${user.uid}");
@@ -38,12 +40,29 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Créer un compte")),
-      body: Padding(
+      appBar: AppBar(
+        title: Text("Créer un compte"),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Image.asset(
+              'images/logo.png',
+              width: 100,
+              height: 100,
+            ),
+            SizedBox(height: 20),
+            // Titre
+            Text(
+              "Inscription",
+              style: Theme.of(context).textTheme.headline1,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            // Champ d'email
             TextField(
               controller: emailController,
               decoration: InputDecoration(
@@ -52,6 +71,7 @@ class RegisterPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
+            // Champ de mot de passe
             TextField(
               controller: passwordController,
               obscureText: true,
@@ -61,6 +81,7 @@ class RegisterPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
+            // Champ de confirmation de mot de passe
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
@@ -70,14 +91,16 @@ class RegisterPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
+            // Bouton d'inscription
             ElevatedButton(
               onPressed: () async {
                 if (passwordController.text != confirmPasswordController.text) {
-                  // Mot de passe et confirmation ne correspondent pas
+                  // Les mots de passe ne correspondent pas
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text("Erreur"),
+                      title: Text("Erreur",
+                          style: TextStyle(color: AppColors.darkBlue)),
                       content: Text("Les mots de passe ne correspondent pas."),
                       actions: [
                         TextButton(
@@ -108,7 +131,8 @@ class RegisterPage extends StatelessWidget {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: Text("Erreur"),
+                        title: Text("Erreur",
+                            style: TextStyle(color: AppColors.darkBlue)),
                         content:
                             Text("Échec de l'inscription : ${e.toString()}"),
                         actions: [
@@ -124,7 +148,10 @@ class RegisterPage extends StatelessWidget {
                   }
                 }
               },
-              child: Text("S'inscrire"),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+              ),
+              child: Text("S'inscrire", style: TextStyle(fontSize: 18)),
             ),
           ],
         ),
