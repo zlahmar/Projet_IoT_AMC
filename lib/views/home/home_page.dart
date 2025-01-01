@@ -9,28 +9,32 @@ class HomePage extends StatelessWidget {
 
   HomePage({required this.username, required this.deviceId});
 
-  Future<String> _fetchUserRole(String username) async {
+  Future<Map<String, String>> _fetchUserDetails(String username) async {
     try {
-      // Accède à Firestore pour récupérer le rôle de l'utilisateur
+      // Accède à Firestore pour récupérer le rôle et l'ID de l'utilisateur
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .where('username', isEqualTo: username)
           .get();
 
       if (userDoc.docs.isNotEmpty) {
-        return userDoc.docs.first.data()['role'] ??
-            'user'; // Default role: user
+        // Récupère les informations du premier utilisateur trouvé
+        final userData = userDoc.docs.first.data();
+        return {
+          'role': userData['role'] ?? 'user',  // Par défaut, rôle "user"
+          'userId': userDoc.docs.first.id      // Récupère l'ID de l'utilisateur
+        };
       }
     } catch (e) {
-      print("Erreur lors de la récupération du rôle : $e");
+      print("Erreur lors de la récupération des données utilisateur : $e");
     }
-    return 'user'; // Par défaut, on considère que c'est un utilisateur normal
+    return {'role': 'user', 'userId': ''}; // Retourne un rôle par défaut si une erreur survient
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: _fetchUserRole(username),
+    return FutureBuilder<Map<String, String>>(
+      future: _fetchUserDetails(username),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Affiche un indicateur de chargement pendant la récupération des données
@@ -40,7 +44,7 @@ class HomePage extends StatelessWidget {
           );
         }
 
-        if (snapshot.hasError || !snapshot.hasData) {
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!['userId'] == '') {
           // Gère les erreurs éventuelles
           return Scaffold(
             appBar: AppBar(title: Text("Erreur")),
@@ -53,8 +57,9 @@ class HomePage extends StatelessWidget {
           );
         }
 
-        // Récupère le rôle de l'utilisateur
-        final role = snapshot.data!;
+        // Récupère le rôle et l'ID de l'utilisateur
+        final role = snapshot.data!['role']!;
+        final userId = snapshot.data!['userId']!;
 
         // Redirige vers les pages correspondantes
         return Scaffold(
@@ -64,14 +69,17 @@ class HomePage extends StatelessWidget {
                   username: username,
                   role: role,
                   deviceId: deviceId,
+                  userId: userId,  // Passer `userId` à la page Admin
                 )
               : MessagePage(
                   username: username,
                   deviceId: deviceId,
                   role: role,
+                  userId: userId,  // Passer `userId` à la page Message
                 ),
         );
       },
     );
   }
 }
+

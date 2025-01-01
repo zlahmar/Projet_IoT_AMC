@@ -1,3 +1,5 @@
+//Cette page n'est plus necessaire, tout est gerer dans le profil
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../home/message_page.dart';
@@ -9,18 +11,21 @@ class AdminPage extends StatelessWidget {
   final String username; // Nom de l'utilisateur
   final String role; // Rôle de l'utilisateur (superadmin ou admin)
   final String deviceId; // Identifiant de l'appareil
+  final String userId; // Identifiant de l'utilisateur (userId ajouté ici)
 
   AdminPage({
     required this.username,
     required this.role,
     required this.deviceId,
+    required this.userId, // Ajout de userId dans le constructeur
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(role == 'superadmin' ? "Super Administrateur" : "Administrateur"),
+        title: Text(
+            role == 'superadmin' ? "Super Administrateur" : "Administrateur"),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -56,6 +61,7 @@ class AdminPage extends StatelessWidget {
                             username: username,
                             role: role,
                             deviceId: deviceId,
+                            userId: userId, // Passer userId ici
                           ),
                         ),
                       );
@@ -89,7 +95,8 @@ class AdminPage extends StatelessWidget {
                       );
                     },
                   ),
-                  if (role == 'superadmin') // Accessible uniquement pour les superadmins
+                  if (role ==
+                      'superadmin') // Accessible uniquement pour les superadmins
                     _buildFeatureButton(
                       context,
                       label: "Gérer les utilisateurs",
@@ -98,7 +105,8 @@ class AdminPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => UsersPage(), // Page des utilisateurs
+                            builder: (context) =>
+                                UsersPage(), // Page des utilisateurs
                           ),
                         );
                       },
