@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'register_page.dart';
 import 'forgot_password_page.dart';
 import '../home/device_selection_page.dart';
+import 'package:amc/services/mqtt_service.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -76,13 +77,28 @@ class LoginPage extends StatelessWidget {
                             email: emailController.text,
                             password: passwordController.text);
 
-                    // Connexion réussie
+                    // Connexion MQTT
+                    const broker = 'broker.emqx.io';
+                    const clientId =
+                        'flutter_client'; // ID unique du client MQTT
+                    const port = 1883;
+                    final mqttService = MqttService(
+                      broker: broker,
+                      port: port,
+                      clientId: clientId,
+                    );
+
+                    // Connexion au broker MQTT
+                    await mqttService.connect();
+
+                    // Connexion réussie, navigation vers DeviceSelectionPage
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DeviceSelectionPage(
                           username: userCredential.user?.email ?? '',
                           userId: userCredential.user?.uid ?? '',
+                          mqttService: mqttService, // Passer mqttService ici
                         ),
                       ),
                     );
@@ -125,7 +141,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ],
             ),
-            //SizedBox(height: 10),
             Align(
               alignment: Alignment.center,
               child: TextButton(

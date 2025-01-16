@@ -1,3 +1,4 @@
+import 'package:amc/services/mqtt_service.dart';
 import 'package:amc/views/admin/device_settings_page.dart';
 import 'package:amc/views/admin/history_page.dart';
 import 'package:amc/views/admin/users_page.dart';
@@ -10,9 +11,13 @@ class ProfilePage extends StatefulWidget {
   final String username;
   final String userId;
   final String role; // Rôle de l'utilisateur (admin, superadmin, user)
+  final MqttService mqttService;
 
   ProfilePage(
-      {required this.username, required this.userId, required this.role});
+      {required this.username,
+      required this.userId,
+      required this.role,
+      required this.mqttService});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -210,6 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     role: widget.role,
                                     deviceId: userDevices[index],
                                     userId: widget.userId,
+                                    mqttService: widget.mqttService,
                                   ),
                                 ),
                               );
@@ -240,6 +246,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             deviceId:
                                 userDevices.isNotEmpty ? userDevices[0] : '',
                             userId: widget.userId,
+                            mqttService: widget.mqttService,
                           ),
                         ),
                       );
@@ -249,12 +256,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     label: "Historique",
                     icon: Icons.history,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HistoryPage(deviceId: ''),
-                        ),
-                      );
+                      if (userDevices.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                HistoryPage(deviceId: userDevices[0]),
+                          ),
+                        );
+                      } else {
+                        // Afficher un message d'erreur si aucun deviceId n'est disponible
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                "Aucun appareil disponible pour l'historique."),
+                          ),
+                        );
+                      }
                     },
                   ),
                   _buildFeatureButton(
