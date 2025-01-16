@@ -1,6 +1,6 @@
 import 'package:amc/views/home/welcome_page.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
+import 'package:firebase_core/firebase_core.dart';
 import './views/home/message_page.dart';
 import 'services/firebase_options.dart';
 import 'theme.dart';

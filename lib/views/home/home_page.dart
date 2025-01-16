@@ -19,14 +19,14 @@ class _HomePageState extends State<HomePage> {
   // @override
   // void initState() {
   //   super.initState();
-  //   // Initialisez MqttService avec les bons paramètres
+  //
   //   mqttService = MqttService('broker.emqx.io', 'AMC/topic');
   //   mqttService.connect(); // Connectez-vous au broker MQTT
   // }
 
   // @override
   // void dispose() {
-  //   mqttService.disconnect(); // Déconnectez MQTT pour libérer les ressources
+  //   mqttService.disconnect();
   //   super.dispose();
   // }
 
