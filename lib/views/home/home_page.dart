@@ -1,13 +1,34 @@
+import 'package:amc/services/mqtt_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../home/message_page.dart';
-import '../admin/admin_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String username; // Nom d'utilisateur actuel
   final String deviceId; // Identifiant de l'appareil
 
   HomePage({required this.username, required this.deviceId});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late MqttService mqttService;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Initialisez MqttService avec les bons paramètres
+  //   mqttService = MqttService('broker.emqx.io', 'AMC/topic');
+  //   mqttService.connect(); // Connectez-vous au broker MQTT
+  // }
+
+  // @override
+  // void dispose() {
+  //   mqttService.disconnect(); // Déconnectez MQTT pour libérer les ressources
+  //   super.dispose();
+  // }
 
   Future<Map<String, String>> _fetchUserDetails(String username) async {
     try {
@@ -21,20 +42,23 @@ class HomePage extends StatelessWidget {
         // Récupère les informations du premier utilisateur trouvé
         final userData = userDoc.docs.first.data();
         return {
-          'role': userData['role'] ?? 'user',  // Par défaut, rôle "user"
-          'userId': userDoc.docs.first.id      // Récupère l'ID de l'utilisateur
+          'role': userData['role'] ?? 'user', // Par défaut, rôle "user"
+          'userId': userDoc.docs.first.id // Récupère l'ID de l'utilisateur
         };
       }
     } catch (e) {
       print("Erreur lors de la récupération des données utilisateur : $e");
     }
-    return {'role': 'user', 'userId': ''}; // Retourne un rôle par défaut si une erreur survient
+    return {
+      'role': 'user',
+      'userId': ''
+    }; // Retourne un rôle par défaut si une erreur survient
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, String>>(
-      future: _fetchUserDetails(username),
+      future: _fetchUserDetails(widget.username),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Affiche un indicateur de chargement pendant la récupération des données
@@ -44,7 +68,9 @@ class HomePage extends StatelessWidget {
           );
         }
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!['userId'] == '') {
+        if (snapshot.hasError ||
+            !snapshot.hasData ||
+            snapshot.data!['userId'] == '') {
           // Gère les erreurs éventuelles
           return Scaffold(
             appBar: AppBar(title: Text("Erreur")),
@@ -64,22 +90,15 @@ class HomePage extends StatelessWidget {
         // Redirige vers les pages correspondantes
         return Scaffold(
           appBar: AppBar(title: Text("Accueil")),
-          body: role == 'superadmin' || role == 'admin'
-              ? AdminPage(
-                  username: username,
-                  role: role,
-                  deviceId: deviceId,
-                  userId: userId,  // Passer `userId` à la page Admin
-                )
-              : MessagePage(
-                  username: username,
-                  deviceId: deviceId,
-                  role: role,
-                  userId: userId,  // Passer `userId` à la page Message
-                ),
+          body: MessagePage(
+            username: widget.username,
+            deviceId: widget.deviceId,
+            role: role,
+            userId: userId,
+            mqttService: mqttService,
+          ),
         );
       },
     );
   }
 }
-

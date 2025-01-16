@@ -10,6 +10,17 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (deviceId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Historique des Messages"),
+        ),
+        body: Center(
+          child: Text("Aucun identifiant d'appareil fourni."),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Historique des Messages"),

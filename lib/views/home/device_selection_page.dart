@@ -1,3 +1,4 @@
+import 'package:amc/services/mqtt_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../home/message_page.dart';
@@ -6,9 +7,13 @@ import '/theme.dart';
 class DeviceSelectionPage extends StatefulWidget {
   final String username; // Username de l'utilisateur
   final String userId; // UID de l'utilisateur Firebase
+  final MqttService mqttService;
 
-  DeviceSelectionPage({required this.username, required this.userId});
-
+  DeviceSelectionPage({
+    required this.username,
+    required this.userId,
+    required this.mqttService,
+  });
   @override
   _DeviceSelectionPageState createState() => _DeviceSelectionPageState();
 }
@@ -134,6 +139,7 @@ class _DeviceSelectionPageState extends State<DeviceSelectionPage> {
                                     role: 'user',
                                     userId: widget.userId,
                                     deviceId: userDevices[index],
+                                    mqttService: widget.mqttService,
                                   ),
                                 ),
                               );
