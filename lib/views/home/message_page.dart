@@ -24,10 +24,10 @@ class MessagePage extends StatelessWidget {
 
     // S'abonner au sujet MQTT
     if (mqttService.isConnected()) {
-      mqttService.subscribe('AMC/topic');
+      mqttService.subscribe('AMC/topic/message');
     } else {
       mqttService.connect().then((_) {
-        mqttService.subscribe('AMC/topic');
+        mqttService.subscribe('AMC/topic/message');
       });
     }
   }
@@ -66,7 +66,7 @@ class MessagePage extends StatelessWidget {
         print("Connecté au broker MQTT.");
       }
 
-      mqttService.publish('AMC/topic', message);
+      mqttService.publish('AMC/topic/message', message);
       print("Message envoyé via MQTT : $message");
       _showSnackbar(context, "Message envoyé avec succès !");
     } catch (e) {
