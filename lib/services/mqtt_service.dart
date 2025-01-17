@@ -91,12 +91,22 @@ class MqttService {
     if (onMessageReceived != null) {
       onMessageReceived!(message.topic, messageContent);
     }
+
+    // Traitement spécifique pour le mode
+    if (message.topic == "AMC/topic/mode") {
+      print("Mode reçu : $messageContent");
+      // Vous pouvez appeler une autre fonction ou mettre à jour l'UI si nécessaire
+    }
   }
 
   // Callbacks pour les événements MQTT
   void onConnected() {
     print('Connecté au broker MQTT.');
     _client.updates?.listen(_onMessage); // Écoute des messages reçus
+
+    // S'abonner automatiquement aux sujets importants
+    subscribe("AMC/topic/mode");
+    subscribe("AMC/topic/message");
   }
 
   bool isConnected() {
